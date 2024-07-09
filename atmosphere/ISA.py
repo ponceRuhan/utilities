@@ -29,8 +29,7 @@ ________________________________________________________________________________
     _______________
     REFERENCES:
     1 - U.S. STANDARD ATMOSPHERE 1976
-        https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pd
-            https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf
+        https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf
 '''
 from numpy import (array, array_equal, ones_like, unique, zeros_like, exp,
                    argwhere)
