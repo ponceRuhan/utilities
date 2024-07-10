@@ -20,6 +20,10 @@ ________________________________________________________________________________
     CODE(s): 
     
     atmosphere/ISA.py
-      Standart atmosphere model 1976.
+      Standart atmosphere model 1976 with ISA variation.
+
+    conversion/speed.py
+      convert airspeed (calibrated, equivalent, true and mach number). And, calculate the 
+      dynamic pressure and impact pressure
     _________________
 
