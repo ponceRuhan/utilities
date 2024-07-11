@@ -47,7 +47,19 @@ class constant:
                 self.hp = array(hp, dtype = float)
         except:
             self.hp = array([hp], dtype = float)
-    
+
+        try:
+            if len(disa) > 1:
+                self.disa = array(disa, dtype = float)
+        except:
+            self.disa = array([disa], dtype = float)
+ 
+        if len(self.disa) == 1:
+            self.disa = ones_like(self.hp)*self.disa
+        else:
+            print(bg.red + 'ERROR: ' + bg.rs + 'disa different lenght of hp')
+            exit()
+
     @property
     def mean_molecular_weight_sealevel(self):
         '''
@@ -105,7 +117,7 @@ class constant:
     @property
     def temperature_sealevel(self):
         #Temperature sea-level [K]
-        return 288.15
+        return 288.15 + self.disa
 
     @property
     def density_sealevel(self):
