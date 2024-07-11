@@ -31,9 +31,11 @@ ________________________________________________________________________________
     1 - U.S. STANDARD ATMOSPHERE 1976
         https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf
 '''
+from sys import exit
 from numpy import (array, array_equal, ones_like, unique, zeros_like, exp,
                    argwhere)
 from scipy.interpolate import interp1d
+from sty import bg
 
 class constant:
     '''
@@ -72,16 +74,18 @@ class constant:
     
     @property
     def mean_molecular_weight_ratio(self):
-        if unique(self.hp <= ones_like(self.hp)*79000):
-            M_per_M0 = ones_like(self.hp)*1.0
-            return M_per_M0
-        else:
+        M_per_M0 = ones_like(self.hp)
+        pos = argwhere(self.hp >= 79000.0)[:,0] 
+         
+        if len(pos) != 0:
             H = array((79000, 79500, 80000, 80500, 81000, 81500,
                        82000, 82500, 83000, 83500, 84000, 84500))
-            M_per_M0 = array((1.0, 0.999996, 0.999988, 0.999969, 0.999938,
+            M_per_M0_table = array((1.0, 0.999996, 0.999988, 0.999969, 0.999938,
                               0.999904, 0.999864, 0.999822, 0.999778, 0.999731,
                               0.999681, 0.999679))
-            return interp1d(H, M_per_M0)(self.hp)
+            M_per_M0[pos] = [interp1d(H, M_per_M0_table)(self.hp[p]) for p in pos]
+
+        return M_per_M0
 
     @property
     def gas_constant(self):
@@ -108,7 +112,15 @@ class constant:
         '''Density sea-level'''
         Rair0 = self.gas_constant/self.mean_molecular_weight_sealevel
         return self.pressure_sealevel/(Rair0*self.temperature_sealevel)
-  
+    
+    @property
+    def speed_sound_sealevel(self):
+        T0 = self.temperature_sealevel
+        M0 = self.mean_molecular_weight_sealevel
+        Rair0 = self.gas_constant/M0
+        gamma = self.ratio_specific_heat
+        return (gamma*Rair0*T0)**0.5
+
     @property
     def air_constant(self):
         '''Gas constant of air [(N.m)/(kmol.K)]'''
@@ -150,9 +162,9 @@ class constant:
                 tmb_pn1 = self.temperature_sealevel + sumT_pn1
 
                 if lmb[p] != 0:
-                    factor *= (tmb_pn1/tmb)**(g0/(Rair*lmb[p]))
+                    factor *= (tmb_pn1/tmb)**(g0/(Rair[p]*lmb[p]))
                 else:
-                    factor *= exp(-g0*(hb[p+1] - hb[p])/(Rair*tmb_pn1))
+                    factor *= exp(-g0*(hb[p+1] - hb[p])/(Rair[p]*tmb_pn1))
             pb[i] = factor*self.pressure_sealevel
         return LMb, Hb, TMb, pb
 
@@ -195,10 +207,20 @@ class ISA(constant):
         try:
             if len(hp) > 1:
                 self.hp = array(hp, dtype = float)
-                self.disa = array(disa, dtype = float)
         except:
             self.hp = array([hp], dtype = float)
+
+        try:
+            if len(disa) > 1:
+                self.disa = array(disa, dtype = float)
+        except:
             self.disa = array([disa], dtype = float)
+ 
+        if len(self.disa) == 1:
+            self.disa = ones_like(self.hp)*self.disa
+        else:
+            print(bg.red + 'ERROR: ' + bg.rs + 'disa different lenght of hp')
+            exit()
 
     @property
     def geometric_height(self):
@@ -236,14 +258,13 @@ class ISA(constant):
         Rair = self.air_constant
         LMb, Hb, TMb, pb = self.gradients
          
-        p = zeros_like(LMb)
+        p = zeros_like(LMb)        
         for i, lmb in enumerate(LMb):
             if lmb != 0:
-                print(TMb[i])
                 p[i] = pb[i]*(TMb[i]/(TMb[i] +
-                        LMb[i]*(self.hp[i] - Hb[i])))**(g0/(Rair*LMb[i]))
+                        LMb[i]*(self.hp[i] - Hb[i])))**(g0/(Rair[i]*LMb[i]))
             else:
-                p[i] = pb[i]*exp(-g0*(self.hp[i] - Hb[i])/(Rair*TMb[i]))
+                p[i] = pb[i]*exp(-g0*(self.hp[i] - Hb[i])/(Rair[i]*TMb[i]))
         return p
 
     @property
