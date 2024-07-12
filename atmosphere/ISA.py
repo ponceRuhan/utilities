@@ -41,7 +41,7 @@ class constant:
     '''
     U.S. STANDAT ATMOSPHERE - CONSTANTS
     '''
-    def __init__(self,hp):
+    def __init__(self,hp,disa):
         try:
             if len(hp) > 1:
                 self.hp = array(hp, dtype = float)
@@ -117,7 +117,7 @@ class constant:
     @property
     def temperature_sealevel(self):
         #Temperature sea-level [K]
-        return 288.15 + self.disa
+        return 288.15
 
     @property
     def density_sealevel(self):
@@ -215,7 +215,7 @@ class ISA(constant):
         - prandtl               : prandtl number                        [-]
     '''
     def __init__(self, hp, disa):
-        constant.__init__(self, hp)
+        constant.__init__(self, hp,disa)
         try:
             if len(hp) > 1:
                 self.hp = array(hp, dtype = float)
