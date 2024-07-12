@@ -113,7 +113,7 @@ class speed:
 
             '''equivalent airspeed
                Olson - Equation 4.26'''
-             self.eas = self.tas*sigma**0.5
+            self.eas = self.tas*sigma**0.5
 
             '''calibrated airspeed
                Olson - Equation 4.20'''
@@ -224,3 +224,6 @@ class speed:
         '''Dynamic pressure [Pa]'''
         return self.q
 
+if __name__ == '__main__':
+    s = speed(10000, disa = 47.5, mach = 0.735)
+    print(s.eas,s.cas,s.tas)
