@@ -1,2 +1,2 @@
-from .ISA import constants
+from .ISA import constant
 from .ISA import ISA
